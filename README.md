@@ -19,7 +19,7 @@ The model classifies MRI scans into:
 - Hybrid **ViT + MiT ensemble**
 - Logit-level fusion (**α = 0.6**)
 - Progressive transfer learning
-- Cosine LR scheduling + warmup
+- Cosine learning-rate scheduling with warmup
 - Automatic Mixed Precision (AMP)
 - Test-Time Augmentation (TTA)
 - Attention-based explainability
@@ -36,7 +36,7 @@ The model classifies MRI scans into:
 | Train | 1,400 | 5,600 |
 | Test | 400 | 1,600 |
 
-Source:  
+**Source:**  
 J. Cheng, *Brain Tumor Dataset*, figshare (2017)  
 https://doi.org/10.6084/m9.figshare.1512427.v5  
 
@@ -51,10 +51,8 @@ Captures **global spatial dependencies** using self-attention.
 Extracts **hierarchical multi-scale features**.
 
 ### Ensemble Fusion
+z_ens = α · z_ViT + (1 − α) · z_MiT, α = 0.6
 
-\[
-z_{ens} = \alpha z_{ViT} + (1 - \alpha) z_{MiT}, \quad \alpha = 0.6
-\]
 
 ---
 
@@ -67,9 +65,9 @@ z_{ens} = \alpha z_{ViT} + (1 - \alpha) z_{MiT}, \quad \alpha = 0.6
 
 ### Key Techniques
 - Progressive backbone unfreezing  
-- Cosine LR schedule with warmup  
+- Cosine learning-rate schedule with warmup  
 - Label smoothing  
-- AMP acceleration  
+- Automatic Mixed Precision (AMP)  
 
 ---
 
@@ -77,65 +75,96 @@ z_{ens} = \alpha z_{ViT} + (1 - \alpha) z_{MiT}, \quad \alpha = 0.6
 
 - Resize: 224 × 224  
 - ImageNet normalization  
-- Augmentations:
-  - Horizontal flip  
-  - Rotation (±10°)  
+
+**Augmentations:**
+- Horizontal flip  
+- Rotation (±10°)  
 
 ---
 
 # 📈 Results & Visualizations
 
+> Brain Tumor Classification · ViT–MiT Ensemble · IEEE Study
+
+---
+
+<div align="center">
+
+![Test Accuracy](https://img.shields.io/badge/Test_Accuracy-99.01%25-00f5c4?style=for-the-badge&labelColor=0b0d14)
+![Macro F1](https://img.shields.io/badge/Macro_F1-0.99-7b5ea7?style=for-the-badge&labelColor=0b0d14)
+![Epochs](https://img.shields.io/badge/Epochs-50-e84393?style=for-the-badge&labelColor=0b0d14)
+![Classes](https://img.shields.io/badge/Tumor_Classes-4-00b4d8?style=for-the-badge&labelColor=0b0d14)
+
+</div>
+
+---
+
 ## Dataset Distribution
 
-![Dataset Distribution](dataset distribution.png)
+<div align="center">
+  <img src="dataset_distribution.png" width="85%"/>
+</div>
 
-*Balanced class-wise distribution across training and testing splits.*
+*Balanced class-wise distribution across training and testing splits, ensuring unbiased evaluation.*
 
 ---
 
 ## Training Curves
 
-![Training Curves](Training Curves.png)
+<div align="center">
+  <img src="training_curves.png" width="85%"/>
+</div>
 
-*Training loss and validation accuracy trends across 50 epochs with progressive unfreezing.*
-
----
-
-## Model Comparison
-
-![Model Comparison](Model Comparison.png)
-
-*Performance comparison between ViT, MiT, and the proposed ensemble.*
+*Training loss and validation accuracy across 50 epochs with progressive unfreezing, showing stable convergence.*
 
 ---
 
-## Confusion Matrix
+## Model Comparison · Confusion Matrix
 
-![Confusion Matrix](Confusion Matrix.png)
+<div align="center">
+  <table>
+    <tr>
+      <td align="center" width="50%">
+        <img src="model_comparison.png" width="100%"/>
+        <br/>
+        <sub><b>Model Comparison</b> — ViT vs MiT vs Ensemble</sub>
+      </td>
+      <td align="center" width="50%">
+        <img src="confusion_matrix.png" width="100%"/>
+        <br/>
+        <sub><b>Confusion Matrix</b> — 4-Class Classification</sub>
+      </td>
+    </tr>
+  </table>
+</div>
 
-*High concentration along diagonal indicates strong classification performance across all classes.*
+*Performance comparison across models. Strong diagonal concentration indicates high classification accuracy across all classes.*
 
 ---
 
 ## ROC Curve
 
-![ROC Curve](ROC curve.png)
+<div align="center">
+  <img src="roc_curve.png" width="85%"/>
+</div>
 
-*Strong class separability with high AUC across all tumor categories.*
+*High separability across tumor classes with strong AUC characteristics under one-vs-rest evaluation.*
 
 ---
 
 ## Attention Maps
 
-![Attention Map](Attention map.png)
+<div align="center">
+  <img src="attention_map.png" width="85%"/>
+</div>
 
-*Model focuses on clinically relevant tumor regions, improving interpretability.*
+*Attention visualizations highlight clinically relevant tumor regions, supporting model interpretability.*
 
 ---
 
 ## 📄 Research Context
 
-This work corresponds to an IEEE-format research study on:
+This work corresponds to an **IEEE-format research study** on:
 
 **Hybrid Vision Transformer and Mix Transformer Ensemble for Multiclass Brain Tumor Classification Using MRI Images**
 
@@ -143,7 +172,7 @@ Includes:
 - Independent test evaluation  
 - Ablation study  
 - Class-wise metrics  
-- Explainability analysis  
+- Attention-based interpretability  
 
 ---
 
@@ -151,15 +180,15 @@ Includes:
 
 - Based on 2D MRI slices  
 - Limited dataset diversity  
-- Meningioma vs glioma overlap  
+- Visual similarity between meningioma and glioma  
 
 ---
 
 ## 🚀 Future Work
 
-- 3D MRI extension  
+- Extension to 3D MRI data  
 - Multi-institution validation  
-- Clinical deployment testing  
+- Further robustness evaluation  
 
 ---
 
@@ -167,9 +196,9 @@ Includes:
 
 This project is intended for **academic and research use**.
 
-- Code: Open for research and educational purposes  
+- Code: Open for educational and research purposes  
 - Dataset: Subject to original figshare license  
-- Research aligned with **IEEE publication standards**
+- Research aligned with IEEE publication standards  
 
 ---
 
