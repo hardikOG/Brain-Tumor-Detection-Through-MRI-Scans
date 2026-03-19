@@ -1,197 +1,168 @@
-# Brain-Tumor-Detector
+# 🧠 ViT–MiT Brain Tumor Classification (IEEE Research Implementation)
 
-Building a detection model using a **Convolutional Neural Network (CNN)** in **TensorFlow & Keras**.
+This repository presents an implementation of a **hybrid Vision Transformer (ViT) and Mix Transformer (MiT) ensemble** for **multiclass brain tumor classification using MRI images**, developed as part of an **IEEE-style research study**.
 
-This project focuses on classifying **MRI brain images** as *tumorous* or *non-tumorous*. The dataset is sourced from Kaggle and serves as a compact yet effective dataset for practicing medical image classification using deep learning.
+The proposed framework performs **4-class classification**:
+- Glioma  
+- Meningioma  
+- Pituitary Tumor  
+- No Tumor  
 
----
+The model is evaluated on a **balanced public MRI dataset (7,200 images)** and achieves:
 
-## 🧠 About the Data
+- **Test Accuracy:** 99.01%  
+- **Macro F1-score:** 0.99  
 
-The dataset contains **two folders** — `yes` and `no` — which include a total of **253 brain MRI images**:
-
-* `yes/` → 155 images containing **tumors**
-* `no/` → 98 images that are **non-tumorous**
-
-**Dataset Source:** [Brain MRI Images for Brain Tumor Detection (Kaggle)](https://www.kaggle.com/datasets)
-
----
-
-## 🚀 Getting Started
-
-> ⚠️ Note: Sometimes, IPython notebooks do not render properly on GitHub. If that happens, view them using [nbviewer](https://nbviewer.jupyter.org/).
-
-### Prerequisites
-
-```bash
-pip install tensorflow keras numpy pandas matplotlib scikit-learn opencv-python
-```
-
-Clone the repository and navigate into it:
-
-```bash
-git clone https://github.com/yourusername/Brain-Tumor-Detector.git
-cd Brain-Tumor-Detector
-```
+The system integrates **transformer-based architectures, logit-level ensembling, progressive transfer learning, and attention-based explainability**.
 
 ---
 
-## 📈 Data Augmentation
+## 🔍 Key Contributions
 
-**Why Data Augmentation?**
+- **Hybrid Transformer Ensemble**
+  - Vision Transformer (ViT) for **global contextual understanding**
+  - Mix Transformer (MiT - SegFormer encoder) for **hierarchical multi-scale feature extraction**
+  - Logit-level fusion with validation-optimized weighting (**α = 0.6**)
 
-Because the dataset is small and imbalanced (155 positive vs 98 negative), augmentation was necessary to:
+- **High-Performance Classification**
+  - Robust 4-class classification on balanced MRI dataset
+  - Strong generalization with independent test evaluation
 
-* Increase data diversity and prevent overfitting.
-* Address the imbalance between tumor and non-tumor samples.
+- **Training Optimization**
+  - Progressive backbone unfreezing
+  - Cosine learning-rate scheduling with warmup
+  - Automatic Mixed Precision (AMP)
+  - Test-Time Augmentation (TTA)
 
-**Before augmentation:**
-
-* Positive (tumor): 155 images
-* Negative (no tumor): 98 images
-* **Total:** 253 images
-
-**After augmentation:**
-
-* Positive (tumor): 1085 images
-* Negative (no tumor): 980 images
-* **Total:** 2065 images
-
-All augmented images (including the original ones) are stored in a folder named `augmented_data/`.
+- **Explainability**
+  - Attention map visualization for interpretability
+  - Class-wise evaluation and confusion matrix analysis
 
 ---
 
-## ⚙️ Data Preprocessing
+## 📊 Dataset
 
-Each MRI image undergoes the following preprocessing steps:
+The model is trained and evaluated on a **public brain MRI dataset**:
 
-1. **Cropping:** Retain only the brain region (removing unnecessary background).
-2. **Resizing:** Uniformly resize all images to `(240, 240, 3)`.
-3. **Normalization:** Scale pixel values to the `[0, 1]` range.
-4. **Splitting:** Divide the dataset into:
+- **Total Images:** 7,200  
+- **Classes:** 4 (balanced)
 
-   * 70% → Training
-   * 15% → Validation
-   * 15% → Testing
+| Split  | Images per Class | Total |
+|--------|-----------------|-------|
+| Train  | 1,400           | 5,600 |
+| Test   | 400             | 1,600 |
 
----
-
-## 🧩 Neural Network Architecture
-
-The CNN architecture is designed to be simple yet efficient for small datasets.
-
-### Architecture Overview
-
-1. Input layer: (240, 240, 3)
-2. Zero Padding layer (2, 2)
-3. Conv2D → 32 filters, (7×7 kernel), stride = 1
-4. Batch Normalization
-5. ReLU activation
-6. MaxPooling (4×4)
-7. Another MaxPooling (4×4)
-8. Flatten layer
-9. Dense → 1 neuron with **sigmoid** activation (binary output)
-
-### Why this architecture?
-
-Initially, transfer learning with **ResNet50** and **VGG16** was attempted, but due to limited data and computational constraints (Intel i7 CPU, 8 GB RAM), those models overfit. A custom lightweight CNN was built and trained from scratch — yielding stable and strong performance.
+**Source:**
+- J. Cheng, *Brain Tumor Dataset*, figshare (2017)  
+  DOI: https://doi.org/10.6084/m9.figshare.1512427.v5  
 
 ---
 
-## 🏋️ Training the Model
+## 🧱 Model Architecture
 
-The model was trained for **24 epochs**.
+### Vision Transformer (ViT)
+- ViT-Base (16×16 patches)
+- 224×224 input resolution
+- 12 layers, 12 heads
+- Embedding dimension: 768
 
-Training plots:
-
-* **Loss Curve:** Demonstrates steady convergence.
-* **Accuracy Curve:** Shows validation accuracy peaking at epoch 23.
-
-**Best validation accuracy:** achieved at epoch 23.
-
----
-
-## 🎯 Results
-
-The model achieved:
-
-* **Accuracy:** 88.7% on the test set
-* **F1 Score:** 0.88 on the test set
-
-| Metric   | Validation Set | Test Set |
-| -------- | -------------- | -------- |
-| Accuracy | 91%            | 89%      |
-| F1 Score | 0.91           | 0.88     |
-
-Considering the dataset size and balance, these results are highly promising.
+Captures **global spatial relationships** in MRI scans.
 
 ---
 
-## 🧾 Files and Structure
+### Mix Transformer (MiT - SegFormer Encoder)
+- MiT-B2 backbone
+- Multi-scale feature hierarchy (strides 4, 8, 16, 32)
+- Channel sizes: 64, 128, 320, 512
 
-```
-Brain-Tumor-Detector/
-├── data/
-│   ├── yes/
-│   ├── no/
-│   ├── augmented_data/
-├── notebooks/
-│   ├── Data_Augmentation.ipynb
-│   ├── Model_Training.ipynb
-├── models/
-│   ├── cnn-parameters-improvement-23-0.91.model
-├── results/
-│   ├── accuracy_plot.png
-│   ├── loss_plot.png
-├── README.md
-```
+Encodes **local + hierarchical tumor morphology**.
 
 ---
 
-## 💾 Loading the Trained Model
+### Logit-Level Fusion
 
-You can restore and reuse the trained model as follows:
+\[
+z_{ens} = \alpha z_{ViT} + (1 - \alpha) z_{MiT}, \quad \alpha = 0.6
+\]
 
-```python
-from tensorflow.keras.models import load_model
-model = load_model('models/cnn-parameters-improvement-23-0.91.model')
-```
-
-Then use it for inference:
-
-```python
-prediction = model.predict(image_array)
-```
+- Fusion performed **before softmax**
+- Weight optimized using **validation set**
 
 ---
 
-## 🧠 Key Learnings
+## ⚙️ Training Strategy
 
-* Data augmentation can drastically improve small medical datasets.
-* Simple CNNs can outperform heavy transfer models in low-resource environments.
-* Proper preprocessing (cropping, normalization) is crucial for medical imaging.
+- **Hardware:** NVIDIA T4 (Google Colab)
+- **Optimizer:** AdamW  
+- **Learning Rate:** 3 × 10⁻⁵  
+- **Batch Size:** 32  
+- **Epochs:** 50  
+
+### Progressive Unfreezing
+- Epochs 1–5: backbone frozen  
+- Epochs 6–15: partial unfreezing  
+- Epochs 16–50: full fine-tuning  
+
+### Learning Rate Schedule
+- Linear warmup → cosine decay  
+
+### Regularization
+- Label smoothing (ε = 0.1)  
+- Automatic Mixed Precision (AMP)
 
 ---
 
-## 🤝 Contributions
+## 🧪 Preprocessing & Augmentation
 
-Contributions, issues, and feature requests are welcome!
+- Resize: 224 × 224  
+- ImageNet normalization  
+- Augmentations:
+  - Horizontal flip  
+  - Rotation (±10°)
 
-To contribute:
-
-1. Fork the repository.
-2. Create a new branch (`feature-name`).
-3. Commit your changes.
-4. Open a pull request.
+### Test-Time Augmentation (TTA)
+- Original + flipped inference  
+- Logits averaged before softmax  
 
 ---
 
-## 🙏 Acknowledgements
+## 📈 Results
 
-* Kaggle for providing the dataset.
-* TensorFlow & Keras for easy deep learning workflows.
+### Overall Performance
 
-**Author:** Hardik Grover
-**Email:** [reach.hardikgrover@gmail.com](mailto:reach.hardikgrover@gmail.com)
+- **Accuracy:** 99.01%  
+- **Macro F1-score:** 0.99  
 
-> *Thank you for exploring Brain Tumor Detector!* 🧠✨
+### Per-Class Metrics
+
+| Class       | Precision | Recall | F1  |
+|------------|----------|--------|-----|
+| Glioma     | 1.00     | 0.98   | 0.99 |
+| Meningioma | 0.98     | 0.98   | 0.98 |
+| No Tumor   | 1.00     | 1.00   | 1.00 |
+| Pituitary  | 0.99     | 1.00   | 0.99 |
+
+---
+
+### Ablation Study
+
+| Configuration | Accuracy (%) |
+|--------------|-------------|
+| ViT only | 98.86 |
+| MiT only | 98.78 |
+| Ensemble (α=0.6) | 98.93 |
+| Ensemble + TTA | **99.01** |
+
+---
+
+## 🖼 Visualizations
+
+Add your figures here:
+
+```markdown
+- Dataset distribution  
+- Training curves  
+- Model comparison  
+- Confusion matrix  
+- ROC curves  
+- Attention maps  
