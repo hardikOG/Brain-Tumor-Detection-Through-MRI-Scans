@@ -1,168 +1,190 @@
 # 🧠 ViT–MiT Brain Tumor Classification (IEEE Research Implementation)
 
-This repository presents an implementation of a **hybrid Vision Transformer (ViT) and Mix Transformer (MiT) ensemble** for **multiclass brain tumor classification using MRI images**, developed as part of an **IEEE-style research study**.
+This repository presents an implementation of a **hybrid Vision Transformer (ViT) and Mix Transformer (MiT) ensemble** for **multiclass brain tumor classification using MRI images**, developed as part of an IEEE-style research study.
 
-The proposed framework performs **4-class classification**:
+The model classifies MRI scans into:
 - Glioma  
 - Meningioma  
 - Pituitary Tumor  
 - No Tumor  
 
-The model is evaluated on a **balanced public MRI dataset (7,200 images)** and achieves:
-
+**Performance:**
 - **Test Accuracy:** 99.01%  
 - **Macro F1-score:** 0.99  
 
-The system integrates **transformer-based architectures, logit-level ensembling, progressive transfer learning, and attention-based explainability**.
-
 ---
 
-## 🔍 Key Contributions
+## 🔍 Key Features
 
-- **Hybrid Transformer Ensemble**
-  - Vision Transformer (ViT) for **global contextual understanding**
-  - Mix Transformer (MiT - SegFormer encoder) for **hierarchical multi-scale feature extraction**
-  - Logit-level fusion with validation-optimized weighting (**α = 0.6**)
-
-- **High-Performance Classification**
-  - Robust 4-class classification on balanced MRI dataset
-  - Strong generalization with independent test evaluation
-
-- **Training Optimization**
-  - Progressive backbone unfreezing
-  - Cosine learning-rate scheduling with warmup
-  - Automatic Mixed Precision (AMP)
-  - Test-Time Augmentation (TTA)
-
-- **Explainability**
-  - Attention map visualization for interpretability
-  - Class-wise evaluation and confusion matrix analysis
+- Hybrid **ViT + MiT ensemble**
+- Logit-level fusion (**α = 0.6**)
+- Progressive transfer learning
+- Cosine LR scheduling + warmup
+- Automatic Mixed Precision (AMP)
+- Test-Time Augmentation (TTA)
+- Attention-based explainability
 
 ---
 
 ## 📊 Dataset
 
-The model is trained and evaluated on a **public brain MRI dataset**:
-
 - **Total Images:** 7,200  
-- **Classes:** 4 (balanced)
+- **Balanced across 4 classes**
 
-| Split  | Images per Class | Total |
-|--------|-----------------|-------|
-| Train  | 1,400           | 5,600 |
-| Test   | 400             | 1,600 |
+| Split | Images per Class | Total |
+|------|----------------|------|
+| Train | 1,400 | 5,600 |
+| Test | 400 | 1,600 |
 
-**Source:**
-- J. Cheng, *Brain Tumor Dataset*, figshare (2017)  
-  DOI: https://doi.org/10.6084/m9.figshare.1512427.v5  
+Source:  
+J. Cheng, *Brain Tumor Dataset*, figshare (2017)  
+https://doi.org/10.6084/m9.figshare.1512427.v5  
 
 ---
 
-## 🧱 Model Architecture
+## 🧱 Model Overview
 
 ### Vision Transformer (ViT)
-- ViT-Base (16×16 patches)
-- 224×224 input resolution
-- 12 layers, 12 heads
-- Embedding dimension: 768
+Captures **global spatial dependencies** using self-attention.
 
-Captures **global spatial relationships** in MRI scans.
+### Mix Transformer (MiT - SegFormer)
+Extracts **hierarchical multi-scale features**.
 
----
-
-### Mix Transformer (MiT - SegFormer Encoder)
-- MiT-B2 backbone
-- Multi-scale feature hierarchy (strides 4, 8, 16, 32)
-- Channel sizes: 64, 128, 320, 512
-
-Encodes **local + hierarchical tumor morphology**.
-
----
-
-### Logit-Level Fusion
+### Ensemble Fusion
 
 \[
 z_{ens} = \alpha z_{ViT} + (1 - \alpha) z_{MiT}, \quad \alpha = 0.6
 \]
 
-- Fusion performed **before softmax**
-- Weight optimized using **validation set**
-
 ---
 
 ## ⚙️ Training Strategy
 
-- **Hardware:** NVIDIA T4 (Google Colab)
 - **Optimizer:** AdamW  
-- **Learning Rate:** 3 × 10⁻⁵  
-- **Batch Size:** 32  
 - **Epochs:** 50  
+- **Batch Size:** 32  
+- **Hardware:** NVIDIA T4  
 
-### Progressive Unfreezing
-- Epochs 1–5: backbone frozen  
-- Epochs 6–15: partial unfreezing  
-- Epochs 16–50: full fine-tuning  
-
-### Learning Rate Schedule
-- Linear warmup → cosine decay  
-
-### Regularization
-- Label smoothing (ε = 0.1)  
-- Automatic Mixed Precision (AMP)
+### Key Techniques
+- Progressive backbone unfreezing  
+- Cosine LR schedule with warmup  
+- Label smoothing  
+- AMP acceleration  
 
 ---
 
-## 🧪 Preprocessing & Augmentation
+## 🧪 Preprocessing
 
 - Resize: 224 × 224  
 - ImageNet normalization  
 - Augmentations:
   - Horizontal flip  
-  - Rotation (±10°)
-
-### Test-Time Augmentation (TTA)
-- Original + flipped inference  
-- Logits averaged before softmax  
+  - Rotation (±10°)  
 
 ---
 
-## 📈 Results
+# 📈 Results & Visualizations
 
-### Overall Performance
+## Dataset Distribution
 
-- **Accuracy:** 99.01%  
-- **Macro F1-score:** 0.99  
+![Dataset Distribution](dataset distribution.png)
 
-### Per-Class Metrics
-
-| Class       | Precision | Recall | F1  |
-|------------|----------|--------|-----|
-| Glioma     | 1.00     | 0.98   | 0.99 |
-| Meningioma | 0.98     | 0.98   | 0.98 |
-| No Tumor   | 1.00     | 1.00   | 1.00 |
-| Pituitary  | 0.99     | 1.00   | 0.99 |
+*Balanced class-wise distribution across training and testing splits.*
 
 ---
 
-### Ablation Study
+## Training Curves
 
-| Configuration | Accuracy (%) |
-|--------------|-------------|
-| ViT only | 98.86 |
-| MiT only | 98.78 |
-| Ensemble (α=0.6) | 98.93 |
-| Ensemble + TTA | **99.01** |
+![Training Curves](Training Curves.png)
+
+*Training loss and validation accuracy trends across 50 epochs with progressive unfreezing.*
 
 ---
 
-## 🖼 Visualizations
+## Model Comparison
 
-Add your figures here:
+![Model Comparison](Model Comparison.png)
 
-```markdown
-- Dataset distribution  
-- Training curves  
-- Model comparison  
-- Confusion matrix  
-- ROC curves  
-- Attention maps  
+*Performance comparison between ViT, MiT, and the proposed ensemble.*
+
+---
+
+## Confusion Matrix
+
+![Confusion Matrix](Confusion Matrix.png)
+
+*High concentration along diagonal indicates strong classification performance across all classes.*
+
+---
+
+## ROC Curve
+
+![ROC Curve](ROC curve.png)
+
+*Strong class separability with high AUC across all tumor categories.*
+
+---
+
+## Attention Maps
+
+![Attention Map](Attention map.png)
+
+*Model focuses on clinically relevant tumor regions, improving interpretability.*
+
+---
+
+## 📄 Research Context
+
+This work corresponds to an IEEE-format research study on:
+
+**Hybrid Vision Transformer and Mix Transformer Ensemble for Multiclass Brain Tumor Classification Using MRI Images**
+
+Includes:
+- Independent test evaluation  
+- Ablation study  
+- Class-wise metrics  
+- Explainability analysis  
+
+---
+
+## ⚠️ Limitations
+
+- Based on 2D MRI slices  
+- Limited dataset diversity  
+- Meningioma vs glioma overlap  
+
+---
+
+## 🚀 Future Work
+
+- 3D MRI extension  
+- Multi-institution validation  
+- Clinical deployment testing  
+
+---
+
+## 📜 License
+
+This project is intended for **academic and research use**.
+
+- Code: Open for research and educational purposes  
+- Dataset: Subject to original figshare license  
+- Research aligned with **IEEE publication standards**
+
+---
+
+## 🙏 Acknowledgment
+
+- SRM Institute of Science and Technology  
+- Public MRI dataset contributors  
+
+---
+
+## ⭐ Citation
+
+```bibtex
+@article{vit_mit_brain_tumor,
+  title={Hybrid Vision Transformer and Mix Transformer Ensemble for Multiclass Brain Tumor Classification Using MRI Images},
+  author={Grover, Hardik and others},
+  year={2026}
+}
